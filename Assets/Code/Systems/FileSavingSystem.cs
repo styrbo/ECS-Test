@@ -23,7 +23,7 @@ namespace Code.Systems {
 
         private const string FileName = "SaveData";
 
-        private string FilePath => Path.Combine(Application.persistentDataPath, FileName);
+        private static string FilePath => Path.Combine(Application.persistentDataPath, FileName);
 
         public override SavingType Type => SavingType.JsonIntoFile;
 

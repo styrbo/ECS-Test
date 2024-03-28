@@ -25,8 +25,8 @@ namespace Code {
                 { CurrencyType.Crystal, new Currency<CrystalComponent>(_world) }
             };
             SupportedSaveMethods = new Dictionary<SavingType, ISaveMethod> {
-                { SavingType.PlayerPrefs, new SaveMethod<PlayerPrefsSavingSystem>(_world) },
-                { SavingType.JsonIntoFile, new SaveMethod<FileSavingSystem>(_world) }
+                { SavingType.PlayerPrefs, new SaveMethod<PlayerPrefsSavingSystem>(this, _world) },
+                { SavingType.JsonIntoFile, new SaveMethod<FileSavingSystem>(this, _world) }
             };
 
             var components = SupportedCurrencies.Values

@@ -12,10 +12,8 @@ namespace Code.Systems {
         
         public abstract SavingType Type { get; }
 
-        protected override void OnCreate() {
-            base.OnCreate();
-
-            Wallet = Main.Wallet;
+        public void Initialize(Wallet wallet) {
+            Wallet = wallet;
         }
 
         protected override void OnUpdate() {
@@ -43,13 +41,11 @@ namespace Code.Systems {
         }
         
         private void RunJob(Func<Task> action) {
-            Job.WithoutBurst().WithCode(() => {
-                try {
-                    action.Invoke().Wait();
-                } catch (Exception e) {
-                    Debug.LogError(e);
+            action().ContinueWith(task => {
+                if (task.IsFaulted) {
+                    Debug.LogError(task.Exception);
                 }
-            }).Run();
+            });
         }
 
         protected abstract Task Load();

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace Code.UI {
     public class CurrenciesScreen : MonoBehaviour {
@@ -7,23 +6,14 @@ namespace Code.UI {
         public CurrencyPanel goldPanel;
         public CurrencyPanel crystalPanel;
         
-        public Button saveButton;
-        public Button loadButton;
+        public SavePanel prefsSavePanel, jsonSavePanel;
 
         private void Awake() {
             goldPanel.Init(CurrencyType.Gold);
             crystalPanel.Init(CurrencyType.Crystal);
             
-            saveButton.onClick.AddListener(OnPressToSaveButton);
-            loadButton.onClick.AddListener(OnPressToLoadButton);
-        }
-        
-        private void OnPressToSaveButton() {
-            Main.Wallet.Save();
-        }
-        
-        private void OnPressToLoadButton() {
-            Main.Wallet.Load();
+            prefsSavePanel.Init(SavingType.PlayerPrefs);
+            jsonSavePanel.Init(SavingType.JsonIntoFile);
         }
     }
 }

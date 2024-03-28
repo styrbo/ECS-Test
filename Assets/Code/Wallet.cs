@@ -7,7 +7,9 @@ using Unity.Entities;
 
 namespace Code {
     public class Wallet {
+        
         public readonly Dictionary<CurrencyType, ICurrency> SupportedCurrencies;
+        public readonly Dictionary<SavingType, ISaveMethod> SupportedSaveMethods;
 
         private readonly World _world;
         private WalletSystemGroup _systemGroup;
@@ -17,10 +19,14 @@ namespace Code {
         public Wallet() {
             _world = World.DefaultGameObjectInjectionWorld;
 
-            // add here new currencies
+            // add here new currencies and save methods here
             SupportedCurrencies = new Dictionary<CurrencyType, ICurrency> {
                 { CurrencyType.Gold, new Currency<GoldComponent>(_world) },
                 { CurrencyType.Crystal, new Currency<CrystalComponent>(_world) }
+            };
+            SupportedSaveMethods = new Dictionary<SavingType, ISaveMethod> {
+                { SavingType.PlayerPrefs, new SaveMethod<PlayerPrefsSavingSystem>(_world) },
+                { SavingType.JsonIntoFile, new SaveMethod<FileSavingSystem>(_world) }
             };
 
             var components = SupportedCurrencies.Values
@@ -32,16 +38,12 @@ namespace Code {
         }
         
         public void InitializeSystems() {
-            var supportedSaveMethods = new []{
-                typeof(PlayerPrefsSavingSystem),
-            };
-
             _systemGroup = _world.CreateSystemManaged<WalletSystemGroup>();
             
             _systemGroup.AddSystemToUpdateList(_world.CreateSystem<WalletSystem>());
             
-            foreach (var saveMethod in supportedSaveMethods) {
-                _systemGroup.AddSystemToUpdateList(_world.CreateSystem(saveMethod));
+            foreach (var (_, system) in SupportedSaveMethods) {
+                _systemGroup.AddSystemToUpdateList(system.Handle);
             }
             
             _systemGroup.AddSystemToUpdateList(_world.CreateSystem<WalletCleanupSystem>());
@@ -67,18 +69,24 @@ namespace Code {
             SetCurrencyValue(0, type);
         }
 
-        public void Save() {
-            _world.EntityManager.AddComponent<SaveRequestComponent>(Entity);
+        public void Save(SavingType type) {
+            if(!SupportedSaveMethods.ContainsKey(type))
+                throw new InvalidOperationException($"Save method {type} is not supported");
+            
+            _world.EntityManager.AddComponentData(Entity, new SaveRequestComponent {
+                Type = type,
+            });
             _systemGroup.Update();
         }
 
-        public void Load() {
-            _world.EntityManager.AddComponent<LoadRequestComponent>(Entity);
+        public void Load(SavingType type) {
+            if(!SupportedSaveMethods.ContainsKey(type))
+                throw new InvalidOperationException($"Save method {type} is not supported");
+            
+            _world.EntityManager.AddComponentData(Entity, new LoadRequestComponent {
+                Type = type,
+            });
             _systemGroup.Update();
-        }
-
-        public static string GetCurrencySaveKey(CurrencyType type) {
-            return $"Currency_{type}";
         }
     }
 }

@@ -28,6 +28,8 @@ namespace Code {
                 component.Value = newValue;
                 _world.EntityManager.SetComponentData(entity, component);
             }
+            
+            entities.Dispose();
         }
 
         public int ReadValue(Entity entity) {

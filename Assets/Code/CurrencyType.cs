@@ -1,6 +1,6 @@
 ﻿namespace Code {
     public enum CurrencyType {
-        Gold,
-        Crystal,
+        Gold = 1,
+        Crystal = 2,
     }
 }
